@@ -101,6 +101,9 @@ router.post('/', csrfProtection, (req, res, next) => {
       if (response.status === 200) {
         // Salva il token o altri dati necessari
         tokenMap[req.body.email] = response.data.token;
+        // show the token
+        console.log('tokenMap:', tokenMap);
+
 
         // Procedi con l'accettazione della richiesta di login...
         hydraAdmin
