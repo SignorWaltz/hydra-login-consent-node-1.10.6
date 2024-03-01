@@ -9,10 +9,23 @@ import { oidcConformityMaybeFakeAcr } from './stub/oidc-cert'
 const csrfProtection = csrf({ cookie: true })
 const router = express.Router()
 
+// Mappa per salvare associazione tra utente e token
+export let tokenMap: {[user:string]:string} = {};
+ 
 router.get('/', csrfProtection, (req, res, next) => {
   // Parses the URL query
   const query = url.parse(req.url, true).query
 
+  // test login
+  res.render('login', {
+    csrfToken: req.csrfToken(),
+    //challenge: challenge,
+    action: urljoin(process.env.BASE_URL || '', '/login'),
+    //hint: body.oidc_context?.login_hint || ''
+  })
+  //fine test
+  
+  
   // The challenge is used to fetch information about the login request from ORY Hydra.
   const challenge = String(query.login_challenge)
   if (challenge == null) {
@@ -20,7 +33,7 @@ router.get('/', csrfProtection, (req, res, next) => {
     return
   }
 
-  hydraAdmin
+    hydraAdmin
     .getLoginRequest(challenge)
     .then(({ data: body }) => {
       // If hydra was already able to authenticate the user, skip will be true and we do not need to re-authenticate
@@ -51,7 +64,7 @@ router.get('/', csrfProtection, (req, res, next) => {
       })
     })
     // This will handle any error that happens when making HTTP calls to hydra
-    .catch(next)
+    .catch(next) 
 })
 
 router.post('/', csrfProtection, (req, res, next) => {
@@ -102,7 +115,7 @@ router.post('/', csrfProtection, (req, res, next) => {
 
           // This tells hydra to remember the browser and automatically authenticate the user in future requests. This will
           // set the "skip" parameter in the other route to true on subsequent requests!
-          remember: true; //Boolean(req.body.remember),
+          remember: true, //Boolean(req.body.remember),
 
           // When the session expires, in seconds. Set this to 0 so it will never expire.
           remember_for: 3600,

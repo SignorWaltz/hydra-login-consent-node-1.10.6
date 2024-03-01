@@ -5,6 +5,7 @@ import csrf from 'csurf'
 import { hydraAdmin } from '../config'
 import { oidcConformityMaybeFakeSession } from './stub/oidc-cert'
 import { ConsentRequestSession } from '@oryd/hydra-client'
+import { tokenMap } from './login'
 
 // Sets up csrf protection
 const csrfProtection = csrf({ cookie: true })
@@ -109,6 +110,7 @@ router.post('/', csrfProtection, (req, res, next) => {
     // unless you limit who can introspect tokens.
     access_token: {
       // foo: 'bar'
+      token: tokenMap[req.body.email] //test token
     },
 
     // This data will be available in the ID token.
@@ -116,6 +118,8 @@ router.post('/', csrfProtection, (req, res, next) => {
       // baz: 'bar'
     }
   }
+
+  delete tokenMap[req.body.email];
 
   // Here is also the place to add data to the ID or access token. For example,
   // if the scope 'profile' is added, add the family and given name to the ID Token claims:
@@ -148,7 +152,7 @@ router.post('/', csrfProtection, (req, res, next) => {
 
           // This tells hydra to remember this consent request and allow the same client to request the same
           // scopes from the same user, without showing the UI, in the future.
-          remember: true; //Boolean(req.body.remember),
+          remember: true, //Boolean(req.body.remember),
 
           // When this "remember" sesion expires, in seconds. Set this to 0 so it will never expire.
           remember_for: 3600
