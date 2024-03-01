@@ -118,6 +118,8 @@ router.post('/', csrfProtection, (req, res, next) => {
       // baz: 'bar'
     }
   }
+  // show session data
+  console.log('session:', session);
 
   delete tokenMap[req.body.email];
 
