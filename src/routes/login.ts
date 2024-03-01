@@ -15,7 +15,7 @@ export let tokenMap: {[user:string]:string} = {};
 router.get('/', csrfProtection, (req, res, next) => {
   // Parses the URL query
   const query = url.parse(req.url, true).query
-
+/*
   // test login
   res.render('login', {
     csrfToken: req.csrfToken(),
@@ -24,7 +24,7 @@ router.get('/', csrfProtection, (req, res, next) => {
     //hint: body.oidc_context?.login_hint || ''
   })
   //fine test
-  
+*/ 
   
   // The challenge is used to fetch information about the login request from ORY Hydra.
   const challenge = String(query.login_challenge)
