@@ -4,6 +4,8 @@ import urljoin from 'url-join'
 import csrf from 'csurf'
 import { hydraAdmin } from '../config'
 import { oidcConformityMaybeFakeAcr } from './stub/oidc-cert'
+import axios from 'axios'
+
 
 // Sets up csrf protection
 const csrfProtection = csrf({ cookie: true })
@@ -88,27 +90,24 @@ router.post('/', csrfProtection, (req, res, next) => {
         .catch(next)
     )
   }
-
-  // Let's check if the user provided valid credentials. Of course, you'd use a database or some third-party service
-  // for this!
-  if (!(req.body.email === 'foo@bar.com' && req.body.password === 'foobar')) {
-    // Looks like the user provided invalid credentials, let's show the ui again...
-
-    res.render('login', {
-      csrfToken: req.csrfToken(),
-      challenge: challenge,
-      error: 'The username / password combination is not correct'
+  else {
+    // Utilizza Axios per inviare una richiesta POST all'API esterna per la verifica delle credenziali
+    axios.post('https://example.com/v1/client/user/login', {
+      username: req.body.email,
+      password: req.body.password
     })
+    .then(response => {
+      // Gestisce il caso di successo (codice 200)
+      if (response.status === 200) {
+        // Salva il token o altri dati necessari
+        tokenMap[req.body.email] = response.data.token;
 
-    return
-  }
-
-  // Seems like the user authenticated! Let's tell hydra...
-
-  hydraAdmin
+        // Procedi con l'accettazione della richiesta di login...
+        hydraAdmin
     .getLoginRequest(challenge)
     .then(({ data: loginRequest }) =>
-      hydraAdmin
+      
+    hydraAdmin
         .acceptLoginRequest(challenge, {
           // Subject is an alias for user ID. A subject can be a random string, a UUID, an email address, ....
           subject: 'foo@bar.com',
@@ -140,17 +139,29 @@ router.post('/', csrfProtection, (req, res, next) => {
     // This will handle any error that happens when making HTTP calls to hydra
     .catch(next)
 
-  // You could also deny the login request which tells hydra that no one authenticated!
-  // hydra.rejectLoginRequest(challenge, {
-  //   error: 'invalid_request',
-  //   errorDescription: 'The user did something stupid...'
-  // })
-  //   .then(({body}) => {
-  //     // All we need to do now is to redirect the browser back to hydra!
-  //     res.redirect(String(body.redirectTo));
-  //   })
-  //   // This will handle any error that happens when making HTTP calls to hydra
-  //   .catch(next);
+    // You could also deny the login request which tells hydra that no one authenticated!
+    // hydra.rejectLoginRequest(challenge, {
+    //   error: 'invalid_request',
+    //   errorDescription: 'The user did something stupid...'
+    // })
+    //   .then(({body}) => {
+    //     // All we need to do now is to redirect the browser back to hydra!
+    //     res.redirect(String(body.redirectTo));
+    //   })
+    //   // This will handle any error that happens when making HTTP calls to hydra
+    //   .catch(next);
+      }
+    })
+    .catch(error => {
+      // Gestisce errori o credenziali non valide
+      res.render('login', {
+        csrfToken: req.csrfToken(),
+        challenge: challenge,
+        error: 'The username / password combination is not correct'
+      });
+    });
+
+  }
 })
 
 export default router
