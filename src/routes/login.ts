@@ -91,6 +91,9 @@ router.post('/', csrfProtection, (req, res, next) => {
     )
   }
   else {
+    // print email and password
+    console.log('password:', req.body.password);
+    console.log('email:', req.body.email);
     // Utilizza Axios per inviare una richiesta POST all'API esterna per la verifica delle credenziali
     axios.post('https://example.com/v1/client/user/login', {
       username: req.body.email,
@@ -154,9 +157,12 @@ router.post('/', csrfProtection, (req, res, next) => {
     //   // This will handle any error that happens when making HTTP calls to hydra
     //   .catch(next);
       }
+      // mostra log status
+      console.log('status:', response.status);
     })
     .catch(error => {
       // Gestisce errori o credenziali non valide
+      console.log('error:', error);
       res.render('login', {
         csrfToken: req.csrfToken(),
         challenge: challenge,
