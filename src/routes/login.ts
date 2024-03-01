@@ -95,7 +95,7 @@ router.post('/', csrfProtection, (req, res, next) => {
     console.log('password:', req.body.password);
     console.log('email:', req.body.email);
     // Utilizza Axios per inviare una richiesta POST all'API esterna per la verifica delle credenziali
-    axios.post('https://example.com/v1/client/user/login', {
+    axios.post('https://aerlink.aermec.com/rest/v1/client/user/login', {
       username: req.body.email,
       password: req.body.password
     })
